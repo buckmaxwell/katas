@@ -1,5 +1,5 @@
-from gilded_rose import GildedRose
-from item import Item
+from .gilded_rose import GildedRose
+from .models.item import Item
 
 if __name__ == "__main__":
     print("OMGHAI!")

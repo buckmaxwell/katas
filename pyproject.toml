@@ -11,8 +11,22 @@ pytest = "^8.3.5"
 approvaltests = "^14.3.0"
 pytest-approvaltests = "^0.2.4"
 coverage = "^7.6.12"
+mypy = "^1.15.0"
+
+[tool.mypy]
+python_version = "^3.11"
+strict = true
+ignore_missing_imports = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_redundant_casts = true
+warn_unreachable = true
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+

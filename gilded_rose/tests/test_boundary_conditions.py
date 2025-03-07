@@ -1,6 +1,6 @@
 import unittest
 from ..gilded_rose import GildedRose
-from ..item import Item
+from ..models.item import Item
 
 
 class TestBoundaryConditions(unittest.TestCase):
