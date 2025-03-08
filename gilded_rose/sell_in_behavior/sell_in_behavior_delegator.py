@@ -15,6 +15,9 @@ class SellInBehaviorDelegator:
 
     @staticmethod
     def update(item: Item) -> None:
+        if item.sell_in_behavior is None:
+            raise ValueError("Item sell_in_behavior is not defined")
+
         behavior_class: Type[
             BaseSellInBehavior
         ] | None = SellInBehaviorDelegator.BEHAVIORS.get(item.sell_in_behavior)

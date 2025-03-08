@@ -18,6 +18,9 @@ class QualityBehaviorDelegator:
 
     @staticmethod
     def update(item: Item) -> None:
+        if item.behavior is None:
+            raise ValueError("Item behavior is not defined")
+
         behavior_class: Type[
             BaseBehavior
         ] | None = QualityBehaviorDelegator.BEHAVIORS.get(item.behavior)
