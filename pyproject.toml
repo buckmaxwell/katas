@@ -12,6 +12,7 @@ approvaltests = "^14.3.0"
 pytest-approvaltests = "^0.2.4"
 coverage = "^7.6.12"
 mypy = "^1.15.0"
+pydantic = "^2.10.6"
 
 [tool.mypy]
 python_version = "3.11"

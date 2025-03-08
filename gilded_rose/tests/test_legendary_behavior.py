@@ -6,7 +6,7 @@ from ..models.enums import QualityBehaviorEnum
 
 class TestLegendaryBehavior(unittest.TestCase):
     def test_sulfuras_static_behavior(self) -> None:
-        item: Item = Item("Sulfuras, Hand of Ragnaros", sell_in=0, quality=80)
+        item: Item = Item(name="Sulfuras, Hand of Ragnaros", sell_in=0, quality=80)
         gilded_rose: GildedRose = GildedRose([item])
         gilded_rose.update_quality()
         self.assertEqual(item.behavior, QualityBehaviorEnum.LEGENDARY)
@@ -14,7 +14,7 @@ class TestLegendaryBehavior(unittest.TestCase):
 
     def test_new_legendary_item(self) -> None:
         item: Item = Item(
-            "Ancient Artifact",
+            name="Ancient Artifact",
             sell_in=10,
             quality=80,
             behavior=QualityBehaviorEnum.LEGENDARY,
