@@ -1,0 +1,8 @@
+new_result.txt
+out.txt
+*.pyc
+__pycache__/
+.approval_tests_temp/
+
+
+
