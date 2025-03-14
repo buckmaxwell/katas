@@ -3,12 +3,27 @@ from pydantic import BaseModel, conlist, model_validator
 from pydantic.fields import Field
 from typing import List
 
+# from random import randrange
+
+MAX_PLAYERS = 6
+MIN_PLAYERS = 2
+
+
+class GameError(Exception):
+    pass
+
+
+class GameFullError(GameError):
+    pass
+
 
 class Game(BaseModel):
-    players: conlist(str, min_length=2, max_length=6) = Field(default_factory=list)
-    places: List[int] = Field(default_factory=lambda: [0] * 6)
-    purses: List[int] = Field(default_factory=lambda: [0] * 6)
-    in_penalty_box: List[int] = Field(default_factory=lambda: [0] * 6)
+    players: conlist(str, min_length=MIN_PLAYERS, max_length=MAX_PLAYERS) = Field(
+        default_factory=list
+    )
+    places: List[int] = Field(default_factory=lambda: [0] * MAX_PLAYERS)
+    purses: List[int] = Field(default_factory=lambda: [0] * MAX_PLAYERS)
+    in_penalty_box: List[int] = Field(default_factory=lambda: [False] * MAX_PLAYERS)
 
     pop_questions: List[str] = Field(default_factory=list)
     science_questions: List[str] = Field(default_factory=list)
@@ -24,20 +39,17 @@ class Game(BaseModel):
             self.pop_questions.append("Pop Question %s" % i)
             self.science_questions.append("Science Question %s" % i)
             self.sports_questions.append("Sports Question %s" % i)
-            self.rock_questions.append(self.create_rock_question(i))
+            self.rock_questions.append("Rock Question %s" % i)
         return self
-
-    def create_rock_question(self, index):
-        return "Rock Question %s" % index
 
     def is_playable(self):
         return self.how_many_players >= 2 and self.how_many_players <= 6
 
     def add(self, player_name):
+        if self.how_many_players >= MAX_PLAYERS:
+            raise GameFullError("Game is full!")
+
         self.players.append(player_name)
-        self.places[self.how_many_players] = 0
-        self.purses[self.how_many_players] = 0
-        self.in_penalty_box[self.how_many_players] = False
 
         print(player_name + " was added")
         print("They are player number %s" % len(self.players))
@@ -109,23 +121,11 @@ class Game(BaseModel):
 
     @property
     def _current_category(self):
-        if self.places[self.current_player] == 0:
+        if self.places[self.current_player] in (0, 4, 8):
             return "Pop"
-        if self.places[self.current_player] == 4:
-            return "Pop"
-        if self.places[self.current_player] == 8:
-            return "Pop"
-        if self.places[self.current_player] == 1:
+        if self.places[self.current_player] in (1, 5, 9):
             return "Science"
-        if self.places[self.current_player] == 5:
-            return "Science"
-        if self.places[self.current_player] == 9:
-            return "Science"
-        if self.places[self.current_player] == 2:
-            return "Sports"
-        if self.places[self.current_player] == 6:
-            return "Sports"
-        if self.places[self.current_player] == 10:
+        if self.places[self.current_player] in (2, 6, 10):
             return "Sports"
         return "Rock"
 
@@ -162,42 +162,45 @@ class Game(BaseModel):
         print(self.players[self.current_player] + " was sent to the penalty box")
         self.in_penalty_box[self.current_player] = True
 
+    def start(self):
+        if not self.is_playable():
+            print("Game is not playable")
+            return
 
-# from random import randrange
+        roll1 = 1
+        roll2 = 0
+        while True:
+
+            # game.roll(randrange(5) + 1)
+            self.roll(roll1)
+
+            # if randrange(9) == 7:
+            if roll2 == 7:
+                self.wrong_answer()
+            else:
+                self.was_correctly_answered()
+                has_winner = self.did_player_win()
+            self.update_current_player()
+
+            if has_winner:
+                break
+            roll1 += 1
+            if roll1 > 6:
+                roll1 = 1
+
+            roll2 += 1
+            if roll2 > 9:
+                roll2 = 0
+
 
 if __name__ == "__main__":
-    not_a_winner = False
+    try:
+        game = Game()
 
-    game = Game()
+        game.add("Chet")
+        game.add("Pat")
+        game.add("Sue")
 
-    game.add("Chet")
-    game.add("Pat")
-    game.add("Sue")
-
-    if not game.is_playable():
-        exit()
-
-    roll1 = 1
-    roll2 = 0
-    while True:
-
-        # game.roll(randrange(5) + 1)
-        game.roll(roll1)
-
-        # if randrange(9) == 7:
-        if roll2 == 7:
-            game.wrong_answer()
-        else:
-            game.was_correctly_answered()
-            has_winner = game.did_player_win()
-        game.update_current_player()
-
-        if has_winner:
-            break
-        roll1 += 1
-        if roll1 > 6:
-            roll1 = 1
-
-        roll2 += 1
-        if roll2 > 9:
-            roll2 = 0
+        game.start()
+    except GameError as exc:
+        print(exc)
