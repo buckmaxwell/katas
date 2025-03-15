@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 MAX_PLAYERS = 6
 MIN_PLAYERS = 2
+CARDS_PER_CATEGORY = 50
 
 
 class GameError(Exception):
@@ -39,7 +40,7 @@ class Game(BaseModel):
     @model_validator(mode="after")
     def post_init(self):
         for category, questions in self.categories.items():
-            for i in range(50):
+            for i in range(CARDS_PER_CATEGORY):
                 questions.append(f"{category} Question {i}")
         return self
 
@@ -102,7 +103,10 @@ class Game(BaseModel):
         print(question)
 
     def get_current_category(self):
-        return list(self.categories.keys())[self.places[self.current_player] % 4]
+        number_of_categories = len(self.categories)
+        return list(self.categories.keys())[
+            self.places[self.current_player] % number_of_categories
+        ]
 
     def update_current_player(self):
         self.current_player += 1
