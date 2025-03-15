@@ -44,7 +44,10 @@ class Game(BaseModel):
         return self
 
     def is_playable(self):
-        return self.number_of_players() >= 2 and self.number_of_players() <= 6
+        return (
+            self.number_of_players() >= MIN_PLAYERS
+            and self.number_of_players() <= MAX_PLAYERS
+        )
 
     def number_of_players(self):
         return len(self.players)
