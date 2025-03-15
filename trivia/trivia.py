@@ -43,10 +43,13 @@ class Game(BaseModel):
         return self
 
     def is_playable(self):
-        return self.how_many_players >= 2 and self.how_many_players <= 6
+        return self.number_of_players() >= 2 and self.number_of_players() <= 6
+
+    def number_of_players(self):
+        return len(self.players)
 
     def add(self, player_name):
-        if self.how_many_players >= MAX_PLAYERS:
+        if self.number_of_players() >= MAX_PLAYERS:
             raise GameFullError("Game is full!")
 
         self.players.append(player_name)
@@ -55,10 +58,6 @@ class Game(BaseModel):
         print("They are player number %s" % len(self.players))
 
         return True
-
-    @property
-    def how_many_players(self):
-        return len(self.players)
 
     def roll(self, roll):
         print("%s is the current player" % self.players[self.current_player])
