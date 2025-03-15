@@ -3,6 +3,8 @@ from pydantic import BaseModel, conlist, model_validator
 from pydantic.fields import Field
 from typing import List
 
+from collections import OrderedDict
+
 # from random import randrange
 
 MAX_PLAYERS = 6
@@ -25,21 +27,20 @@ class Game(BaseModel):
     purses: List[int] = Field(default_factory=lambda: [0] * MAX_PLAYERS)
     in_penalty_box: List[int] = Field(default_factory=lambda: [False] * MAX_PLAYERS)
 
-    pop_questions: List[str] = Field(default_factory=list)
-    science_questions: List[str] = Field(default_factory=list)
-    sports_questions: List[str] = Field(default_factory=list)
-    rock_questions: List[str] = Field(default_factory=list)
+    categories: OrderedDict[str, List[str]] = Field(
+        default_factory=lambda: OrderedDict(
+            [("Pop", []), ("Science", []), ("Sports", []), ("Rock", [])]
+        )
+    )
 
     current_player: int = 0
     is_getting_out_of_penalty_box: bool = False
 
     @model_validator(mode="after")
     def post_init(self):
-        for i in range(50):
-            self.pop_questions.append("Pop Question %s" % i)
-            self.science_questions.append("Science Question %s" % i)
-            self.sports_questions.append("Sports Question %s" % i)
-            self.rock_questions.append("Rock Question %s" % i)
+        for category, questions in self.categories.items():
+            for i in range(50):
+                questions.append(f"{category} Question {i}")
         return self
 
     def is_playable(self):
@@ -51,13 +52,9 @@ class Game(BaseModel):
     def add(self, player_name):
         if self.number_of_players() >= MAX_PLAYERS:
             raise GameFullError("Game is full!")
-
         self.players.append(player_name)
-
         print(player_name + " was added")
         print("They are player number %s" % len(self.players))
-
-        return True
 
     def move_player(self, roll):
         self.places[self.current_player] = self.places[self.current_player] + roll
@@ -96,26 +93,13 @@ class Game(BaseModel):
             self.ask_question()
 
     def ask_question(self):
-        # No index error over 50 questions
-        category_deck = {
-            "Pop": self.pop_questions,
-            "Science": self.science_questions,
-            "Sports": self.sports_questions,
-            "Rock": self.rock_questions,
-        }
-        deck = category_deck[self.get_current_category()]
+        deck = self.categories[self.get_current_category()]
         question = deck.pop(0)
         deck.append(question)
         print(question)
 
     def get_current_category(self):
-        if self.places[self.current_player] in (0, 4, 8):
-            return "Pop"
-        if self.places[self.current_player] in (1, 5, 9):
-            return "Science"
-        if self.places[self.current_player] in (2, 6, 10):
-            return "Sports"
-        return "Rock"
+        return list(self.categories.keys())[self.places[self.current_player] % 4]
 
     def update_current_player(self):
         self.current_player += 1
