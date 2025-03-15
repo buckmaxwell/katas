@@ -84,7 +84,7 @@ class Game(BaseModel):
                     + "'s new location is "
                     + str(self.places[self.current_player])
                 )
-                print("The category is %s" % self._current_category)
+                print("The category is %s" % self.get_current_category())
                 self._ask_question()
             else:
                 print(
@@ -102,7 +102,7 @@ class Game(BaseModel):
                 + "'s new location is "
                 + str(self.places[self.current_player])
             )
-            print("The category is %s" % self._current_category)
+            print("The category is %s" % self.get_current_category())
             self._ask_question()
 
     def _ask_question(self):
@@ -113,13 +113,12 @@ class Game(BaseModel):
             "Sports": self.sports_questions,
             "Rock": self.rock_questions,
         }
-        deck = category_deck[self._current_category]
+        deck = category_deck[self.get_current_category()]
         question = deck.pop(0)
         deck.append(question)
         print(question)
 
-    @property
-    def _current_category(self):
+    def get_current_category(self):
         if self.places[self.current_player] in (0, 4, 8):
             return "Pop"
         if self.places[self.current_player] in (1, 5, 9):
