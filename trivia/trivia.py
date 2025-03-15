@@ -59,10 +59,21 @@ class Game(BaseModel):
 
         return True
 
-    def roll(self, roll):
+    def move_player(self, roll):
+        self.places[self.current_player] = self.places[self.current_player] + roll
+        if self.places[self.current_player] > 11:
+            self.places[self.current_player] = self.places[self.current_player] - 12
+
+        print(
+            self.players[self.current_player]
+            + "'s new location is "
+            + str(self.places[self.current_player])
+        )
+        print("The category is %s" % self.get_current_category())
+
+    def take_turn(self, roll):
         print("%s is the current player" % self.players[self.current_player])
         print("They have rolled a %s" % roll)
-
         if self.in_penalty_box[self.current_player]:
             if roll % 2 != 0:
                 self.is_getting_out_of_penalty_box = True
@@ -71,41 +82,20 @@ class Game(BaseModel):
                     "%s is getting out of the penalty box"
                     % self.players[self.current_player]
                 )
-                self.places[self.current_player] = (
-                    self.places[self.current_player] + roll
-                )
-                if self.places[self.current_player] > 11:
-                    self.places[self.current_player] = (
-                        self.places[self.current_player] - 12
-                    )
-
-                print(
-                    self.players[self.current_player]
-                    + "'s new location is "
-                    + str(self.places[self.current_player])
-                )
-                print("The category is %s" % self.get_current_category())
-                self._ask_question()
+                self.move_player(roll)
+                self.ask_question()
             else:
                 print(
                     "%s is not getting out of the penalty box"
                     % self.players[self.current_player]
                 )
+
                 self.is_getting_out_of_penalty_box = False
         else:
-            self.places[self.current_player] = self.places[self.current_player] + roll
-            if self.places[self.current_player] > 11:
-                self.places[self.current_player] = self.places[self.current_player] - 12
+            self.move_player(roll)
+            self.ask_question()
 
-            print(
-                self.players[self.current_player]
-                + "'s new location is "
-                + str(self.places[self.current_player])
-            )
-            print("The category is %s" % self.get_current_category())
-            self._ask_question()
-
-    def _ask_question(self):
+    def ask_question(self):
         # No index error over 50 questions
         category_deck = {
             "Pop": self.pop_questions,
@@ -169,8 +159,9 @@ class Game(BaseModel):
         roll2 = 0
         while True:
 
-            # game.roll(randrange(5) + 1)
-            self.roll(roll1)
+            # game.take_turn(randrange(5) + 1)
+            rolled_dice = roll1
+            self.take_turn(rolled_dice)
 
             # if randrange(9) == 7:
             if roll2 == 7:
